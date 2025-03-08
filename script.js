@@ -155,7 +155,7 @@ function getPrice(starts, wins) {
   if (wins > 30) {
     price = 200000
   } else if (wins > 20) {
-    price = 180000 // Když je více než 70% vítězství, vysoká cena
+    price = 160000 // Když je více než 70% vítězství, vysoká cena
   } else if (winRatio > 0.7) {
     price = 150000 // Když je více než 70% vítězství, vysoká cena
   } else if (winRatio > 0.3) {
