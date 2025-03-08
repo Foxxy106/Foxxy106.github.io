@@ -1,15 +1,25 @@
-<!DOCTYPE html>
-<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hřebčín</title>
-  <link rel="stylesheet" href="styles.css">
+    <title>Tvůj název stránky</title>
+    <!-- Zde můžeš přidat odkazy na externí styly nebo skripty -->
+    <link rel="stylesheet" href="style.css">  <!-- Příklad pro externí CSS -->
 </head>
-  <body>
-<div class="container">
-<h2 class="staje">Stáje</h2>
-<h2 class="aukce">Aukce</h2>
-</div>
-    <script src="script.js"></script>
-  </body>
+<body>
+  <h4 class="penize" id="penize"></h4>
+  <button onclick="ageHorses()">Zestárnout všechny koně</button>
+
+  <div class="container">
+    <h2 class="staje" onclick="stáj()">Stáje</h2>
+    <h2 class="aukce" onclick="aukce();generateHorses(5)">Prodej koní</h2>
+  </div>
+  <div id="kone">
+    <div id="stable-list"></div>
+  </div>
+  <div id="aukce">
+    <div class="prodej">
+      <div id="horses-list"></div>
+    </div>
+  </div>
+<script src="script.js"></script>
+</body>
