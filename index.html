@@ -1,19 +1,20 @@
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hřebčín</title>
-    <!-- Zde můžeš přidat odkazy na externí styly nebo skripty -->
-    <link rel="stylesheet" href="style.css">  <!-- Příklad pro externí CSS -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hřebčín</title>
+
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h4 class="penize" id="penize"></h4>
   <button onclick="ageHorses()">Zestárnout všechny koně</button>
-
   <div class="container">
     <h2 class="staje" onclick="stáj()">Stáje</h2>
     <h2 class="aukce" onclick="aukce();generateHorses(5)">Prodej koní</h2>
   </div>
   <div id="kone">
+    <h5 id="boxy"></h5>
+    <button onclick="buildStable()">Postavit box</button>
     <div id="stable-list"></div>
   </div>
   <div id="aukce">
@@ -21,5 +22,5 @@
       <div id="horses-list"></div>
     </div>
   </div>
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
