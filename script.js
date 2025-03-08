@@ -1,15 +1,24 @@
-let budget = 1000000
+let budget = 600000
 let ownedHorses = []
+let usedButtons = {}
+let stableCapacity = 2
+let stableCost = 30000
 document.getElementById("penize").innerHTML = budget + " Kč"
+document.getElementById("boxy").textContent =
+  `Boxy: ${ownedHorses.length}/${stableCapacity}`
 function stáj() {
   document.getElementById("kone").style.display = "block"
   document.getElementById("aukce").style.display = "none"
   document.getElementById("penize").innerHTML = budget + " Kč"
+  document.getElementById("boxy").textContent =
+    `Boxy: ${ownedHorses.length}/${stableCapacity}`
 }
 function aukce() {
   document.getElementById("aukce").style.display = "block"
   document.getElementById("kone").style.display = "none"
   document.getElementById("penize").innerHTML = budget + " Kč"
+  document.getElementById("boxy").textContent =
+    `Boxy: ${ownedHorses.length}/${stableCapacity}`
 }
 // Pole s jmény koní
 const horses = [
@@ -167,7 +176,6 @@ function getPrice(starts, wins) {
   return price
 }
 
-// Funkce pro generování více koní
 function generateHorses(numHorses) {
   const horsesList = document.getElementById("horses-list")
   horsesList.innerHTML = "" // Vymažeme předchozí výsledky
@@ -175,70 +183,179 @@ function generateHorses(numHorses) {
   // Generování více koní
   for (let i = 0; i < numHorses; i++) {
     const horseName = getRandomHorse()
-    const { starts, wins, age } = getRandomStats()
+    const { starts, wins, age } = getRandomStats() // Tady to získáváte
     const price = getPrice(starts, wins)
 
     // Vytvoření divu pro každého koně
     const horseDiv = document.createElement("div")
     horseDiv.innerHTML = `
-          <h4>Kůň: ${horseName}</h4>
-          <h4>Počet startů: ${starts}</h4>
-          <h4>Počet vítězství: ${wins}</h4>
-          <h4>Věk: ${age} let</h4>
-          <h4>Cena koně: ${price} Kč</h4>
-          <button onclick="buyHorse('${horseName}', ${starts}, ${wins}, ${age}, ${price}, this)">Koupit</button>
-          <hr>
-        `
+      <h4>Kůň: ${horseName}</h4>
+      <h4>Počet startů: ${starts}</h4>
+      <h4>Počet vítězství: ${wins}</h4>
+      <h4>Věk: ${age} let</h4>
+      <h4>Cena koně: ${price} Kč</h4>
+      <button id="koupitKone" onclick="buyHorse('${horseName}', ${price}, ${starts}, ${wins}, ${age}, this)">Koupit</button>
+      <hr>
+    `
+
     horsesList.appendChild(horseDiv) // Přidání do seznamu koní
   }
 }
-function buyHorse(name, starts, wins, age, price, button) {
-  if (budget >= price) {
-    budget -= price
+
+function buyHorse(name, price, starts, wins, age, button) {
+  if (ownedHorses.length < stableCapacity) {
+    if (budget >= price) {
+      budget -= price
+      ownedHorses.push({
+        name: name,
+        starts: starts, // Přidání počtu startů
+        wins: wins, // Přidání počtu vítězství
+        age: age, // Přidání věku
+      })
+      document.getElementById("penize").textContent = budget + " Kč"
+      document.getElementById("boxy").textContent =
+        `Boxy: ${ownedHorses.length}/${stableCapacity}`
+      renderStable()
+
+      // Změna textu tlačítka a deaktivace
+      button.textContent = "Prodáno"
+      button.disabled = true
+    } else {
+      alert("Nemáš dost peněz na tohoto koně!")
+    }
+  } else {
+    alert("Nemáš dost volných boxů! Musíš nejdříve postavit nový box.")
+  }
+}
+
+// Výpočet popularity
+// Výpočet popularity
+function calculatePopularity(starts, wins) {
+  if (starts === 0) return 1
+
+  let winRate = wins / starts
+
+  if (wins >= 35) return 5
+  else if (winRate === 1) return 5
+  else if (winRate >= 0.75) return 4
+  else if (winRate >= 0.5) return 3
+  else if (winRate >= 0.25) return 2
+  return 1
+}
+
+function ageHorses() {
+  let totalCost = ownedHorses.length * 60000 // Cena za zestárnutí všech koní
+
+  if (budget >= totalCost) {
+    budget -= totalCost
     document.getElementById("penize").textContent = budget + " Kč"
 
-    let popularity = calculatePopularity(starts, wins)
+    // Zestárnutí koní a odstranění těch, kteří mají 25 let
+    ownedHorses = ownedHorses.filter((horse) => {
+      horse.age++ // Zestárnutí koně
+      return horse.age < 25 // Ponecháme jen ty, kteří mají méně než 25 let
+    })
 
-    ownedHorses.push({ name, starts, wins, age, popularity })
+    // Zajištění obnovy tlačítek po zestárnutí
+    ownedHorses.forEach((horse, index) => {
+      horse.popularity = calculatePopularity(horse.starts, horse.wins) // Přidejte výpočet popularity
 
-    const stableList = document.getElementById("stable-list")
+      let horseId = `horse-${index}`
+
+      let button = document.getElementById(horseId) // Předpokládáme, že tlačítka mají ID jako 'horse-index'
+      if (button) {
+        button.style.display = "inline-block" // Nastavení tlačítka jako inline-block
+      }
+    })
+
+    // Volání renderStable po změnách
+    renderStable() // Zajistíme, že se po zestárnutí znovu vykreslí stáje
+  } else {
+    alert("Nemáš dost peněz na zestárnutí všech koní!")
+  }
+}
+
+function renderStable() {
+  const stableList = document.getElementById("stable-list")
+  stableList.innerHTML = "" // Vyčistíme předchozí obsah
+
+  ownedHorses.forEach((horse, index) => {
+    horse.popularity = calculatePopularity(horse.starts, horse.wins) // Výpočet popularity
     const horseDiv = document.createElement("div")
     horseDiv.classList.add("owned-horse")
 
+    let horseId = `horse-${index}`
+
+    // Inicializujeme tlačítka, pokud pro tohoto koně ještě nejsou
+    if (!usedButtons[horseId]) {
+      usedButtons[horseId] = new Array(horse.popularity).fill(false)
+    }
+
+    // Vytváříme tlačítka pro vydělávání peněz
+    let moneyButtons = usedButtons[horseId]
+      .map((used, i) => {
+        if (!used) {
+          return `<button id="button" onclick="earnMoney(${horse.popularity}, '${horseId}', ${i}, this)">💰</button>`
+        }
+        return "" // Nevrací tlačítko, pokud už bylo použito
+      })
+      .join("") // Spojení všech tlačítek
+
     horseDiv.innerHTML = `
-      <h4>${name}</h4>
+      <h4>${horse.name}</h4>
       <p class="horse-info">
-        Starty: ${starts}, Výhry: ${wins}, Věk: <span class="horse-age">${age}</span> let
+        Starty: ${horse.starts}, Výhry: ${horse.wins}, Věk: <span class="horse-age">${horse.age}</span> let
       </p>
-      <p>Popularita: <span class="horse-popularity">${popularity}</span> ⭐</p>
+      <p>Popularita: <span class="horse-popularity">${horse.popularity}</span> ⭐</p>
+      <div class="money-buttons">${moneyButtons}</div>
       <hr>
     `
-    stableList.appendChild(horseDiv)
 
-    button.textContent = "Prodáno"
-    button.disabled = true
-  } else {
-    alert("Nemáš dost peněz!")
+    stableList.appendChild(horseDiv) // Přidání koně do stáje
+  })
+}
+
+// Funkce na vydělávání peněz
+function earnMoney(popularity, horseId, buttonIndex, button) {
+  let moneyEarned = 0
+
+  // Výpočet peněz podle popularity koně
+  switch (popularity) {
+    case 5:
+      moneyEarned = 22000
+      break
+    case 4:
+      moneyEarned = 17000
+      break
+    case 3:
+      moneyEarned = 15000
+      break
+    case 2:
+      moneyEarned = 10000
+      break
+    default:
+      moneyEarned = 5000
+      break
+  }
+
+  // Přičtení vydělaných peněz do rozpočtu
+  budget += moneyEarned
+  document.getElementById("penize").textContent = `${budget} Kč`
+
+  // Skrytí tlačítka nebo jeho odstranění
+  if (button) {
+    button.style.display = "none" // Skrytí tlačítka místo odstranění
   }
 }
-function ageHorses() {
-  ownedHorses.forEach((horse) => {
-    horse.age++
-  })
 
-  document.querySelectorAll(".owned-horse").forEach((div, index) => {
-    div.querySelector(".horse-age").textContent = ownedHorses[index].age
-  })
-}
-
-// Výpočet popularity podle úspěšnosti
-function calculatePopularity(starts, wins) {
-  if (starts === 0) return 1 // Pokud kůň nestartoval, min. popularita 1
-  let winRate = wins / starts
-
-  if (winRate === 1) return 5
-  if (winRate >= 0.75) return 4
-  if (winRate >= 0.5) return 3
-  if (winRate >= 0.25) return 2
-  return 1
+function buildStable() {
+  if (budget >= stableCost) {
+    budget -= stableCost
+    stableCapacity++ // Přidání nového boxu
+    document.getElementById("penize").textContent = budget + " Kč"
+    document.getElementById("boxy").textContent =
+      `Boxy: ${ownedHorses.length}/${stableCapacity}`
+  } else {
+    alert("Nemáš dost peněz na stavbu boxu!")
+  }
 }
