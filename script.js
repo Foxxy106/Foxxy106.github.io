@@ -236,6 +236,7 @@ function calculatePopularity(starts, wins) {
   let winRate = wins / starts
 
   if (wins >= 35) return 5
+    else if (wins>= 29) return 4
   else if (winRate === 1) return 5
   else if (winRate >= 0.75) return 4
   else if (winRate >= 0.5) return 3
